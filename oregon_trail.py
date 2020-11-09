@@ -102,6 +102,18 @@ or you run out of provisisons, or you die of cholera -- don't give up! Try again
     input("Press Enter To Continue")
     print("\nThe software team responsible for creation of this product includes:\n - Spencer Burton\n - James Hooper\n")
 
+def month_advice() :
+    """Prints the text when you ask for advice"""
+    print("""
+You attend a public meeting held for “folks with the California - Oregon fever.” You are told:
+
+
+If you leave too early, there won’t be any grass for your oxen to eat. If you leave too late,
+you might not get to Oregon before winter comes. If you leave at just the right time,
+there will be green grass and the weather will still be cool.""")
+    input("Press Enter To Continue")
+
+
 def play_game() :
     """The actual game function"""
 
@@ -110,9 +122,27 @@ def play_game() :
     profession = prof_data[0]
     money = prof_data[1]
     
-    #Name Leader
-    #name four others potato
-    #and then confirm names
+    # Name Leader and other members
+    name_data = name_members()
+    leader = name_data[0]
+    members = name_data[1]
+
+    # Choose month
+    month = ""
+    
+    while True :
+        print("\nIt is 1848. Your jumping off place for Oregon is Independence,\n \
+Missouri. You must decide which month to leave Independence.")
+        choice = menu(["March", "April", "May", "June", "July", "Ask for advice"])
+
+        if choice == 6 :
+            month_advice()
+        else :
+            month = ("March", "April", "May", "June", "July")[choice - 1]
+            break
+
+    
+    
 
 def char_setup() :
     """Gets the profession and returns it and the amount of money they have"""
@@ -159,6 +189,62 @@ earns the greatest number of points and the banker earns the least.
 
     return (profession, money)
 
+def name_members() :
+    """Get the names of wagon leader and family members"""
+    leader_name = get_name("\nWhat is the name of your wagon leader? ")
+
+    # Ask how many family members
+    num_family = get_number("\nHow many other family members? ", 1, 9)
+
+    family_names = []
+
+    # Get names of family members
+    print()
+    
+    for i in range(num_family) :
+        family_names.append(get_name(str.format("What is the name of member #{}? ", i + 1)))
+
+    # Ask if they are sure, if not get number in range of the names and change it with get_name
+
+    return (leader_name, family_names)
+
+def get_name(question) :
+    """Get name that is valid"""
+    while True :
+        name = input(question)
+
+        if len(name) >= 2 and len(name) <= 16 :
+            return name
+
+def get_number(question, min, max) :
+    """Gets number in range"""
+    while True :
+        number = int(input(question))
+
+        # Check to make sure number only has digits not letters
+
+        if number >= min and number <= max :
+            return number
+    
+def shop(money,food,ammo,cloths,parts,oxen) :
+    """Handles the shopping interface"""
+    bill = 0
+    items = ["Oxen","Food","Ammo","Cloths","Wagon Parts","Check Out"]
+    spent_on_items = [0.00,0.00,0.00,0.00,0.00,bill]
+
+    print("Before leaving Indipendance you should buy equipment and supplies.")
+    print(str.format("You have ${} in cash, but you don't have to spend it all now", money))
+    print("You can buy whatever you need at Matt's General Store.")
+    input("Press Enter To Continue")
+
+    while True :
+        # Update bill in the list
+        spent_on_items[len(spent_on_items) - 1] = bill
+
+        print("Welcome to Matt's General Store")
+        print("Here is a list of things you can buy")
+        for i in range (len(items)):
+            print(str.format(""))
     
 #***********************************************************************************************************
 
