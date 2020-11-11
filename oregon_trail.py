@@ -34,16 +34,9 @@ def menu(options) :
     for i in range(len(options)) :
         print(str.format("  {}. {}", i + 1, options[i]))
 
-    while not success :
-        value = input("What do you choose: ")
+    value = get_number("What do you choose: ", 1, len(options))
 
-        if value in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9") :
-            int_value = int(value)
-
-            if int_value in range(1, len(options) + 1) :
-                success = True
-
-    return int(value)
+    return value
 
 
 def start_screen() :
@@ -107,11 +100,10 @@ def month_advice() :
     print("""
 You attend a public meeting held for “folks with the California - Oregon fever.” You are told:
 
-
 If you leave too early, there won’t be any grass for your oxen to eat. If you leave too late,
 you might not get to Oregon before winter comes. If you leave at just the right time,
 there will be green grass and the weather will still be cool.""")
-    input("Press Enter To Continue")
+    input("\nPress Enter To Continue")
 
 
 def play_game() :
@@ -131,7 +123,7 @@ def play_game() :
     month = ""
     
     while True :
-        print("\nIt is 1848. Your jumping off place for Oregon is Independence,\n \
+        print("\nIt is 1848. Your jumping off place for Oregon is Independence,\n\
 Missouri. You must decide which month to leave Independence.")
         choice = menu(["March", "April", "May", "June", "July", "Ask for advice"])
 
@@ -141,6 +133,15 @@ Missouri. You must decide which month to leave Independence.")
             month = ("March", "April", "May", "June", "July")[choice - 1]
             break
 
+
+    # Declare variables for shop
+    food = 0
+    ammo = 0
+    clothes = 0
+    parts = []
+    oxen = 0
+    
+    shop(money, food, ammo, clothes, parts, oxen)
     
     
 
@@ -194,7 +195,8 @@ def name_members() :
     leader_name = get_name("\nWhat is the name of your wagon leader? ")
 
     # Ask how many family members
-    num_family = get_number("\nHow many other family members? ", 1, 9)
+    print()
+    num_family = get_number("How many other family members? ", 1, 9)
 
     family_names = []
 
@@ -204,7 +206,7 @@ def name_members() :
     for i in range(num_family) :
         family_names.append(get_name(str.format("What is the name of member #{}? ", i + 1)))
 
-    # Ask if they are sure, if not get number in range of the names and change it with get_name
+    # Maybe Later : Ask if they are sure, if not get number in range of the names and change it with get_name
 
     return (leader_name, family_names)
 
@@ -219,47 +221,172 @@ def get_name(question) :
 def get_number(question, min, max) :
     """Gets number in range"""
     while True :
-        number = int(input(question))
+        valid = True
+        
+        number = input(question)
 
-        # Check to make sure number only has digits not letters
+        # Make sure it is only numerical digits
+        for digit in number :
+            if not digit in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9") :
+                valid = False
 
-        if number >= min and number <= max :
-            return number
+        if valid and not number == "" :
+            num = int(number)
+
+            if num >= min and num <= max :
+                return num
     
-def shop(money,food,ammo,cloths,parts,oxen) :
+def shop(money,food,ammo,clothes,parts,oxen) :
     """Handles the shopping interface"""
     bill = 0
-    items = ["Oxen","Food","Ammo","Cloths","Wagon Parts","Check Out"]
+    inventory = []
+    items = ["Oxen","Food","Ammo","Clothing","Wagon Parts","Check Out"]
     spent_on_items = [0.00,0.00,0.00,0.00,0.00,bill]
 
-    print("Before leaving Indipendance you should buy equipment and supplies.")
+    print("\nBefore leaving Indipendance you should buy equipment and supplies.")
     print(str.format("You have ${} in cash, but you don't have to spend it all now", money))
     print("You can buy whatever you need at Matt's General Store.")
-    input("Press Enter To Continue")
+    input("\nPress Enter To Continue")
 
     while True :
         # Update bill in the list
         spent_on_items[len(spent_on_items) - 1] = bill
 
-        print("Welcome to Matt's General Store")
+        print("\nWelcome to Matt's General Store")
         print("Here is a list of things you can buy")
+
+        # Display current money and choices
         for i in range (len(items)):
-            print(str.format(""))
+            print(str.format("{}. {:20} ${:.2f}", i + 1, items[i], spent_on_items[i]))
+        print(str.format("Total Bill so far:      ${:.2f}", bill))
+        print(str.format("Total funds available:  ${:.2f}\n", money - bill))
+
+        choice = get_number("What item would you like to buy: ", 1, len(items))
+
+        # Oxen buying
+        if choice == 1 :
+            # Subtract any previous money from this from the bill
+            bill -= spent_on_items[0]
+            oxen = 0
+            spent_on_items[0] = 0
+            
+            print("\nThere are 2 oxen in a yoke; \nI recommend at least 3 yoke. \nI charge $40.00 a yoke.\n")
+            print(str.format("Total Bill so far:      ${:.2f}", bill))
+            num_yoke = get_number("How many yoke do you want: ", 1, 5)
+
+            cost = num_yoke * 40
+            oxen = num_yoke * 2
+            bill += cost
+            spent_on_items[0] = cost
+
+        # Food buying
+        elif choice == 2 :
+            # Subtract any previous money from this from the bill
+            bill -= spent_on_items[1]
+            food = 0
+            spent_on_items[1] = 0
+            
+            print("""
+I recommend you take at least 200 pounds of food
+for each person in you family.
+I Charge $0.20 a pound.\n""")
+            print(str.format("Total Bill so far:      ${:.2f}", bill))
+            food = get_number("How many pounds of food do you want: ", 1, 2500)
+
+            cost = food * 0.2
+            bill += cost
+            spent_on_items[1] = cost
+
+        # Ammo buying
+        elif choice == 3 :
+            # Subtract any previous money from this from the bill
+            bill -= spent_on_items[2]
+            ammo = 0
+            spent_on_items[2] = 0
+            
+            print("\nI sell ammunition in boxes of 20 bullets each box costs $2.00\n")
+            print(str.format("Total Bill so far:      ${:.2f}", bill))
+            num_boxes = get_number("How many boxes do you want: ", 1, 99)
+
+            cost = num_boxes * 2
+            ammo = num_boxes * 20
+            bill += cost
+            spent_on_items[2] = cost
+
+        # Clothes buying
+        elif choice == 4 :
+            # Subtract any previous money from this from the bill
+            bill -= spent_on_items[3]
+            clothes = 0
+            spent_on_items[3] = 0
+            
+            print("""
+You'll need warm clothing in the mountains.
+I recommend taking at 2 sets of clothing per person.
+Each set is $10.00.\n""")
+            print(str.format("Total Bill so far:      ${:.2f}", bill))
+            clothes = get_number("How many sets of clothes do you want: ", 1, 40)
+
+            cost = clothes * 10
+            bill += cost
+            spent_on_items[3] = cost
+
+        # Parts buying
+        elif choice == 5 :
+            # Subtract any previous money from this from the bill
+            bill -= spent_on_items[4]
+            spent_on_items[4] = 0
+            parts_bill = 0
+            parts = ["Wagon Wheel", "Wagon Axle", "Wagon Tongue", "back to main shop"]
+            parts_cost = [10.00, 20.00, 50.00, parts_bill]
+
+            print("\nIt's a good idea to have a few spare parts for your wagon\n")
+
+            while True :
+                parts_cost[len(parts_cost) - 1] = parts_bill
+                print("\nHere is a list of things you can buy:")
+                for i in range(len(parts)) :
+                    print(str.format("{}. {:20} ${:.2f}", i + 1, parts[i], parts_cost[i]))
+                print(str.format("Total Bill so far:      ${:.2f}", bill + parts_bill))
+                print(str.format("Total funds available:  ${:.2f}\n", money - (bill + parts_bill)))
+                item = get_number("What item would you like to buy: ", 1, len(parts))
+
+                if item == 1 :
+                    wheels = get_number("How many Wagon Wheels do you want: ", 0, 3)
+                    for i in range(wheels) :
+                        inventory.append("Wagon Wheel")
+                    parts_bill += parts_cost[0] * wheels
+
+                elif item == 2 :
+                    axles = get_number("How many Wagon Axles do you want: ", 0, 3)
+                    for i in range(axles) :
+                        inventory.append("Wagon Axle")
+                    parts_bill += parts_cost[1] * axles
+
+                elif item == 3 :
+                    tongues = get_number("How many Wagon Tongues do you want: ", 0, 3)
+                    for i in range(tongues) :
+                        inventory.append("Wagon Tongue")
+                    parts_bill += parts_cost[2] * tongues
+
+                elif item == 4 :
+                    bill += parts_bill
+                    spent_on_items[4] = parts_bill
+                    break
+
+        # Check out
+        elif choice == 6 :
+            if (money - bill) < 0 :
+                print("\nYour bill exceeds your balance, please remove some items")
+            else :
+                return (money - bill, food, ammo, clothes, parts, oxen)
+
+
     
 #***********************************************************************************************************
 
 # Display splash screen
 logo_screen()
 
-# Display start menu
+# Display start menu and start the game
 start_screen()
-
-
-
-
-
-
-
-
-
-
