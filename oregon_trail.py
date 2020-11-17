@@ -141,9 +141,44 @@ Missouri. You must decide which month to leave Independence.")
     parts = []
     oxen = 0
     
-    shop(money, food, ammo, clothes, parts, oxen)
-    
-    
+    shop_data = shop(money, food, ammo, clothes, parts, oxen)
+    money = shop_data[0]
+    food = shop_data[1]
+    ammo = shop_data[2]
+    clothes = shop_data[3]
+    parts = shop_data[4]
+    oxen = shop_data[5]
+
+    weather = "good"
+    health = "good"
+    pace = "normal"
+    rations = "filling"
+
+    while True :
+
+        choice = menu(("Continue on trail", "Check supplies", "Change pace", "Change food ration", "Stop to rest", "Attempt to trade", "Hunt for food"))
+
+        print()
+        
+        if choice == 1 :
+            # Continue on trail
+            travel(weather, pace, health)        
+            
+        elif choice == 2 :
+            # Check Supplies
+            check_supplies(money, food, ammo, clothes, oxen, parts)
+
+
+        elif choice == 3 :
+            # Change Pace
+            change_pace(pace)
+
+        elif choice == 4 :
+            # Change food ration
+            change_rations(rations)
+
+        print()
+
 
 def char_setup() :
     """Gets the profession and returns it and the amount of money they have"""
@@ -236,7 +271,7 @@ def get_number(question, min, max) :
             if num >= min and num <= max :
                 return num
     
-def shop(money,food,ammo,clothes,parts,oxen) :
+def shop(money,food,ammo,clothes,wagon_parts,oxen) :
     """Handles the shopping interface"""
     bill = 0
     inventory = []
@@ -337,6 +372,7 @@ Each set is $10.00.\n""")
             bill -= spent_on_items[4]
             spent_on_items[4] = 0
             parts_bill = 0
+            inventory = []
             parts = ["Wagon Wheel", "Wagon Axle", "Wagon Tongue", "back to main shop"]
             parts_cost = [10.00, 20.00, 50.00, parts_bill]
 
@@ -379,9 +415,77 @@ Each set is $10.00.\n""")
             if (money - bill) < 0 :
                 print("\nYour bill exceeds your balance, please remove some items")
             else :
-                return (money - bill, food, ammo, clothes, parts, oxen)
+                return (money - bill, food, ammo, clothes, wagon_parts + inventory, oxen)
 
+def change_rations(rations):
+    """Displays Current rations then lets you change it"""
+    print("Current Rations:",rations)
+    choice = menu(("filling","meager","bare bones"))
+    if choice == 1:
+        rations = "filling"
+    elif choice == 2:
+        rations = "meager"
+    elif choice == 3:
+        rations = "bare bones"
+    return rations
 
+def change_pace(pace):
+    """Displays Current pace then lets you change it"""
+    print("Current Pace:",pace)
+    choice = menu(("fast","normal","slow"))
+    if choice == 1:
+        pace = "fast"
+    elif choice == 2:
+        pace = "normal"
+    elif choice == 3:
+        pace = "slow"
+    return pace
+
+def check_supplies(money, food, ammo, clothes, oxen, parts) :
+    """Displays current supplies"""
+    print("Money:", "$" + str(money))
+    print("Food:", food)
+    print("Ammo:", ammo)
+    print("Clothes:", clothes)
+    print("Oxen:", oxen)
+    print("Parts:", parts)
+
+def travel(weather, pace, health) :
+    """Travels a certain number of miles based on weather, pace, and health"""
+    mph = 0
+    hours = 0
+    weather_mod = 0
+
+    # Determine hours per day
+    if health == "good" :
+        hours = 8
+    elif health == "normal" :
+        hours = 4
+    elif health == "poor" :
+        hours = 2
+
+    # Determine miles per hour
+    if pace == "slow" :
+        mph = 1
+    elif pace == "normal" :
+        mph = 2
+    elif pace == "fast" :
+        mph = 4
+
+    # Determine weather modifier
+    if weather == "good" :
+        weather_mod = 1
+    elif weather == "rain" :
+        weather_mod = 0.5
+    elif weather == "hot" :
+        weather_mod = 0.25
+    elif weather == "blizzard" :
+        weather_mode = 0
+
+    # Do the calculuminations
+    miles = mph * hours * weather_mod
+
+    return miles
     
 #***********************************************************************************************************
 
