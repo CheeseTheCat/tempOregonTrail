@@ -21,7 +21,7 @@ def logo_screen() :
                            - The Oregon Trail -
 """
     
-    names = "Jame Hooper and Spencer Burton"
+    names = "James Hooper and Spencer Burton"
     copy_right = "Copyright (c) 2020"
 
     print(str.format("{} {}\n {}", copy_right, names, logo))
