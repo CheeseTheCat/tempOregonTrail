@@ -1,5 +1,8 @@
 # James Hooper and Spencer Burton
 
+import datetime
+import random
+
 #**********************************Functions**************************************************************
 def logo_screen() :
     """This is the first screen"""
@@ -115,12 +118,10 @@ def play_game() :
     money = prof_data[1]
     
     # Name Leader and other members
-    name_data = name_members()
-    leader = name_data[0]
-    members = name_data[1]
+    members = name_members()
 
     # Choose month
-    month = ""
+    month = 0
     
     while True :
         print("\nIt is 1848. Your jumping off place for Oregon is Independence,\n\
@@ -130,9 +131,16 @@ Missouri. You must decide which month to leave Independence.")
         if choice == 6 :
             month_advice()
         else :
-            month = ("March", "April", "May", "June", "July")[choice - 1]
+            month = choice
             break
 
+    # Defern sum veriables
+    START_DATE = datetime.datetime(1848, month + 2, 1)
+    current_date = START_DATE
+    hp = 100
+    ox_hp = 100
+    total_miles = 2000
+    miles_traveled = 0
 
     # Declare variables for shop
     food = 0
@@ -149,36 +157,182 @@ Missouri. You must decide which month to leave Independence.")
     parts = shop_data[4]
     oxen = shop_data[5]
 
-    weather = "good"
+    # Choose weather based on month
+    weather = ("cool", "cool", "good", "good", "hot")[month - 1]
     health = "good"
     pace = "normal"
     rations = "filling"
 
-    while True :
+    
+    while len(members) > 0 and miles_traveled < total_miles and oxen > 0:
+        turn_data = turn(weather, hp, health, rations, current_date, members, food, oxen, miles_traveled, total_miles, money, pace, ammo, clothes, parts)
+        weather = turn_data[0]
+        hp = turn_data[1]
+        health = turn_data[2]
+        rations = turn_data[3]
+        current_date = turn_data[4]
+        food = turn_data[5]
+        oxen = turn_data[6]
+        miles_traveled = turn_data[7]
+        pace = turn_data[8]
+        ammo = turn_data[9]
+        clothes = turn_data[10]
+        parts = turn_data[11]
+        members = turn_data[12]
 
-        choice = menu(("Continue on trail", "Check supplies", "Change pace", "Change food ration", "Stop to rest", "Attempt to trade", "Hunt for food"))
+    if miles_traveled >= total_miles :
+        print("Congrats on getting to Oregon")
+        input("Press enter to exit")
+    elif len(family) <= 0:
+        print("Looks you like all your members died, too bad")
+        input("Press enter to exit")
+    else :
+        print("Looks you like all your oxen are gone, too bad")
+        input("Press enter to exit")
+        
+
+def turn(weather, hp, health, rations, current_date, family, food, oxen, miles_traveled, total_miles, money, pace, ammo, clothes, parts) :
+    weather = random.choice(("hot", "good", "fair", "poor", "windy", "rain", "blizzard"))
+
+    if hp >= 80 :
+        health = "good"
+    elif hp < 80 and hp >= 50 :
+        health = "fair"
+    else :
+        health = "poor"
+
+    if rations == "filling" :
+        rations_mod = 2
+    elif rations == "meager" :
+        rations_mod = 1
+    else :
+        rations_mod = 0.5
+
+    problem = random.choice(("lost", "snake bite", "sick", "rip ox", "none", "none", "none",
+                             "none", "none", "none", "none"))
+
+    rand_person = random.choice(family)
+    problem_string = ""
+    
+    if problem == "lost" :
+        lost = random.randint(1, 7)
+        problem_string = rand_person + " got lost for " + str(lost) + "days"
+        current_date += datetime.timedelta(days = lost)
+        if food >= (len(family) - 1) * rations_mod * lost :
+            food -= (len(family) - 1) * rations_mod * lost
+        else :
+            hp -= 10
+    elif problem == "snake bite" :
+        problem_string = rand_person + " got bitten by a snake"
+        hp -= 50
+    elif problem == "sick" :
+        problem_string = rand_person + random.choice([" got dysentary", " got cholera", " got covid-47", " broke their arm",
+                                                    " ate a random mushroom"])
+        hp -= 20
+    elif problem == "rip ox" :
+        problem_stirng = random.choice(("One of your ox has died, but you got some more food because of it",
+                             "A thief left a note saying 'I stole one of your oxen, but I felt bad and left some food'"))
+        oxen -= 1
+        food += 50
+
+
+    # Check if someone died
+    if hp <= 0 :
+        family.remove(rand_person)
+        hp = 100
+        print(rand_person, "has died\n")
+
+    print(str.format("""\n
+   .....                                        ..'..                              ..',,,'..        
+..',;;;,,'...  ...                       ..'''',,;;;;,..                       ..',;;;;;;;;,,,'..   
+,;;,;;;;;,;;;,,,;,,...               ..',;;;;;,,;;;;;;;;,'..     ..''....',,'',,;;;;;;;;;;,;;;;;,'..
+;;;;;;;;;;;;;;;;;;;;;,,....'..   ..',;;;;;;;;;;;;;;;;;;;;;;,'..',;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,,',,;,,;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+''''''''''''''',,,''''.........'''''',,,''''''''''''',,;;;;;,,,,,,,,,,,,;;;;;;;;;;;;,,,''...'',,,;;;
+                                                      ........        ...............            ...
+ +-----------------------------+                                                                    
+ |Date:{:_>24}|                 
+ |Weather:{:_>21}|           ..'''''''''''..                         ..''''''.        
+ |Health:{:_>22}|          ,:ccccllllllllc::::,...  ......  ..,::::::clclllcc,.      
+ |Miles Traveled:{:_>14}|         .cc'.;cccclccccccccclc'.;cllllc;.'ccccccccccccclcl;.      
+ |Miles To Go:{:_>17}|          .;c, .,:clcclclcclcclc'.clcccclc.'cccccccccccclll:.       
+ |Food:{:_>24}|           .cc.  .';cccclcclcclc'.clcccclc.'cccccccccccccc:.        
+ +-----------------------------+            ,:;.   'ccccccclcclc'.clcccclc.'cccccccccccccc'         
+                 ..                         .;c;.   ,ccclccccllc'.clcccllc.'cccccclccllcc,          
+          .,,. .'::.  ....                   .:c.   .clcccccclcc'.cccccclc.'cccccccccccc'           
+           .,:::cl,..',';c;:;;;;:;;;'.        ',.   .:cccccccccc..:cccccc:.'ccccccccccc:.           
+         .';clcccl,';;::ccccccccccccc:.       ....  ......,,,,'.  .............',,,,..','.          
+          ...';:;,,;cccllcclcclccccccc........'.''.',...',.,;',,. .,','',,,  .,'';,','.''.          
+                .;:clcclcccclllccccc:,.      ...',... .,'. ', .';. ..,',,.. .;. .,. .,,.            
+                 .'clcccc::;'.,:lclc.         ..''    ';...;;...;'   ''''   ,;..';,..';.            
+                  .cc,:c;..  .,cc,:c.                 .,'. ', .',.          .;. .,. .,,.            
+                .':c,..;l'   .';:;:c.                  .',',;','.            .,,';,',.              
+'..''.''''.'''.',:c:,'';:,''''',::::,'''''...'''''''''''',;;;;,''''''''''..'''';;;;;,'''.''''''''''.
+;;;;;;;;;;;;;;,;;:::;;;::;,,;;;;::;;;;;;;;;;;;;;;;;;;;;;;;;;;,;;;;;;;;;;;;;;;;;;,;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;,;::::;;;:;;;;;;;:::;;;;;;;;;;;;;;;;;;;;;;;;;,;;,;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,
+;;;;;;;;;;;{:;>40},;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+""",current_date.strftime("%A %b %d, %Y"),weather,health,miles_traveled,total_miles - miles_traveled,food, problem_string))
+
+    while True :
+        choice = menu(("Continue on trail", "Check supplies", "Change pace", "Change food ration",
+                       "Stop to rest", "Attempt to trade", "Hunt for food"))
 
         print()
         
         if choice == 1 :
             # Continue on trail
-            travel(weather, pace, health)        
+            miles_traveled += travel(weather, pace, health, oxen)
+            if food >= len(family) * rations_mod :
+                food -= len(family) * rations_mod
+            else :
+                hp -= 10
+            current_date += datetime.timedelta(days = 1)
+            break
             
         elif choice == 2 :
             # Check Supplies
             check_supplies(money, food, ammo, clothes, oxen, parts)
 
-
         elif choice == 3 :
             # Change Pace
-            change_pace(pace)
+            pace = change_pace(pace)
 
         elif choice == 4 :
             # Change food ration
-            change_rations(rations)
+            rations = change_rations(rations)
+                
+        elif choice == 5 :
+            # Rest
+            hp, rest_days = rest(hp, health)
+            if food >= len(family) * rations_mod * rest_days :
+                food -= len(family) * rations_mod * rest_days
+            else :
+                hp -= 10
+            current_date += datetime.timedelta(days = rest_days)
+        
+        elif choice == 6 :
+            # Attempt to trade
+            print("There was no one to trade with")
+            
+        elif choice == 7  and ammo > 0:
+            # hunt
+            hunt_data = hunt(ammo, food)
+            ammo = hunt_data[0]
+            food = hunt_data[1]
+            if food >= len(family) * rations_mod * hunt_data[2] :
+                food -= len(family) * rations_mod * hunt_data[2]
+            else :
+                hp -= 10
+            current_date += datetime.timedelta(days = hunt_data[2])
 
         print()
 
+    # Make sure food not less than zero
+    if food < 0 :
+        food = 0
+
+    return (weather, hp, health, rations, current_date, food, oxen, miles_traveled, pace, ammo, clothes, parts, family)
+    
 
 def char_setup() :
     """Gets the profession and returns it and the amount of money they have"""
@@ -233,7 +387,7 @@ def name_members() :
     print()
     num_family = get_number("How many other family members? ", 1, 9)
 
-    family_names = []
+    family_names = [leader_name]
 
     # Get names of family members
     print()
@@ -243,7 +397,7 @@ def name_members() :
 
     # Maybe Later : Ask if they are sure, if not get number in range of the names and change it with get_name
 
-    return (leader_name, family_names)
+    return family_names
 
 def get_name(question) :
     """Get name that is valid"""
@@ -450,7 +604,7 @@ def check_supplies(money, food, ammo, clothes, oxen, parts) :
     print("Oxen:", oxen)
     print("Parts:", parts)
 
-def travel(weather, pace, health) :
+def travel(weather, pace, health, oxen) :
     """Travels a certain number of miles based on weather, pace, and health"""
     mph = 0
     hours = 0
@@ -459,7 +613,7 @@ def travel(weather, pace, health) :
     # Determine hours per day
     if health == "good" :
         hours = 8
-    elif health == "normal" :
+    elif health == "fair" :
         hours = 4
     elif health == "poor" :
         hours = 2
@@ -473,19 +627,52 @@ def travel(weather, pace, health) :
         mph = 4
 
     # Determine weather modifier
-    if weather == "good" :
-        weather_mod = 1
-    elif weather == "rain" :
+    if weather == "rain" :
         weather_mod = 0.5
     elif weather == "hot" :
         weather_mod = 0.25
     elif weather == "blizzard" :
-        weather_mode = 0
+        weather_mod = 0
+    else :
+        weather_mod = 1
 
     # Do the calculuminations
-    miles = mph * hours * weather_mod
+    miles = mph * hours * weather_mod * (oxen // 2)
 
     return miles
+
+def hunt(ammo, food):
+    if ammo > 10 :
+        used_ammo = random.randint(1, 10)
+    else :
+        used_ammo = random.randint(1, ammo)
+
+    ammo -= used_ammo
+    added_food = random.randint(50, 200)
+    food += added_food
+    days = random.randint(0, 3)
+    print("You went hunting and got", added_food, "lbs of food and used", used_ammo, "bullets, after", days, "days.")
+
+    return (ammo, food, days)
+
+def rest(health,rations):
+    days = get_number("How many days do you want to rest ", 0, 9)
+    if rations == "filling":
+        health_mod = 2
+    elif rations == "meager":
+        health_mod = 1
+    else :
+        health_mod = .5
+        
+    health_gain = 10 * days * health_mod
+    if (health_gain + health) > 100:
+        health = 100
+    else:
+        health += health_gain
+        
+    return health, days
+
+
     
 #***********************************************************************************************************
 
