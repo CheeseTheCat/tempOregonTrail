@@ -183,7 +183,7 @@ Missouri. You must decide which month to leave Independence.")
     if miles_traveled >= total_miles :
         print("Congrats on getting to Oregon")
         input("Press enter to exit")
-    elif len(family) <= 0:
+    elif len(members) <= 0:
         print("Looks you like all your members died, too bad")
         input("Press enter to exit")
     else :
@@ -216,7 +216,7 @@ def turn(weather, hp, health, rations, current_date, family, food, oxen, miles_t
     
     if problem == "lost" :
         lost = random.randint(1, 7)
-        problem_string = rand_person + " got lost for " + str(lost) + "days"
+        problem_string = rand_person + " got lost for " + str(lost) + " days"
         current_date += datetime.timedelta(days = lost)
         if food >= (len(family) - 1) * rations_mod * lost :
             food -= (len(family) - 1) * rations_mod * lost
@@ -230,7 +230,7 @@ def turn(weather, hp, health, rations, current_date, family, food, oxen, miles_t
                                                     " ate a random mushroom"])
         hp -= 20
     elif problem == "rip ox" :
-        problem_stirng = random.choice(("One of your ox has died, but you got some more food because of it",
+        problem_string = random.choice(("One of your ox has died, but you got some more food because of it",
                              "A thief left a note saying 'I stole one of your oxen, but I felt bad and left some food'"))
         oxen -= 1
         food += 50
@@ -270,7 +270,7 @@ def turn(weather, hp, health, rations, current_date, family, food, oxen, miles_t
 '..''.''''.'''.',:c:,'';:,''''',::::,'''''...'''''''''''',;;;;,''''''''''..'''';;;;;,'''.''''''''''.
 ;;;;;;;;;;;;;;,;;:::;;;::;,,;;;;::;;;;;;;;;;;;;;;;;;;;;;;;;;;,;;;;;;;;;;;;;;;;;;,;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;,;::::;;;:;;;;;;;:::;;;;;;;;;;;;;;;;;;;;;;;;;,;;,;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,
-;;;;;;;;;;;{:;>40},;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;{:;<87};;;;;;;;;;;
 """,current_date.strftime("%A %b %d, %Y"),weather,health,miles_traveled,total_miles - miles_traveled,food, problem_string))
 
     while True :
